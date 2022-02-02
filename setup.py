@@ -13,8 +13,8 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='henry',
-    maintainer_email='henry.gennet@hs-osnabrueck.de',
+    maintainer='Henry Gennet',
+    maintainer_email='henry.gennet@gmail.de',
     description='Simple Video publisher + subscriber (with imshow) for thermal camera',
     license='Apache Licence 2.0',
     tests_require=['pytest'],
@@ -22,7 +22,6 @@ setup(
         'console_scripts': [
             'publish_thermal = thermal_cam.publish_thermal_stream:main',
             'subscribe_thermal = thermal_cam.sub_show_thermal_stream:main',
-            'publish_webcam = thermal_cam.publish_cam:main',
         ],
     },
 )

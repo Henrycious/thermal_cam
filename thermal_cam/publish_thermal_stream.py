@@ -45,7 +45,6 @@ class ThermalPublisher(Node):
         if ret:
             self.publisher_.publish(self.cvBridge.cv2_to_imgmsg(top_frame))
             self.publisher2_.publish(self.cvBridge.cv2_to_imgmsg(heatmap, encoding='bgr8'))
-            self.get_logger().info('Publishing IR Video frame!')
         
       
 

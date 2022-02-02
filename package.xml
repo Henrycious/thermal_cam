@@ -4,7 +4,7 @@
   <name>thermal_cam</name>
   <version>0.0.0</version>
   <description>Simple Video publisher and subscriber (with imshow) for thermal camera</description>
-  <maintainer email="henry.gennet@hs-osnabrueck.de">henry gennet</maintainer>
+  <maintainer email="henry.gennet@gmail.com">henry gennet</maintainer>
   <license>Apachace license 2.0</license>
 
   <test_depend>ament_copyright</test_depend>
