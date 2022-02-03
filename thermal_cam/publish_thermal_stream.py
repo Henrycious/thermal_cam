@@ -10,6 +10,7 @@ import cv2
 import os
 import re
 import numpy as np
+from termcolor import colored
 
 
 class ThermalPublisher(Node):
@@ -20,9 +21,7 @@ class ThermalPublisher(Node):
         timer_period = 1/60; #camera runs with 60 FPS
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-        cam_number = self.get_camera_index_by_name('USB Camera: USB Camera')
-        self.cap = cv2.VideoCapture(cam_number)
-
+        self.connect_camera_by_name('USB Camera: USB Camera')
         self.cvBridge = CvBridge()
 
     def timer_callback(self):
@@ -35,21 +34,25 @@ class ThermalPublisher(Node):
             self.publisher_.publish(self.cvBridge.cv2_to_imgmsg(top_frame))
             self.publisher2_.publish(self.cvBridge.cv2_to_imgmsg(heatmap, encoding='bgr8'))
 
-    def get_camera_index_by_name(camera_name):
-            cam_num = None
-            for file in os.listdir("/sys/class/video4linux"):
-                real_file = os.path.realpath("/sys/class/video4linux/" + file + "/name")
-                with open(real_file, "rt") as name_file:
-                    name = name_file.read().rstrip()
-                if camera_name in name:
-                    cam_num = int(re.search("\d+$", file).group(0))
-                    found = "FOUND!"
-                    return cam_num
-                    break
-                else:
-                    found = "      "
-                print("{} {} -> {}".format(found, file, name))
-            return cam_num
+    def connect_camera_by_name(self, camera_name):
+        cam_num = None
+        for file in os.listdir("/sys/class/video4linux"):
+            real_file = os.path.realpath("/sys/class/video4linux/" + file + "/name")
+            with open(real_file, "rt") as name_file:
+                name = name_file.read().rstrip()
+            if camera_name in name:
+                cam_num = int(re.search("\d+$", file).group(0))
+                self.cap = cv2.VideoCapture(cam_num)
+                success, img = self.cap.read()
+                if success:
+                    height, width = img.shape[:2]
+                    if success and height == 384 and width == 256:
+                        self.get_logger().info('Camera connected: ' + camera_name)                        
+                        return cam_num
+                        break
+            else:
+                continue 
+        return cam_num
 
 def main(args=None):
     
