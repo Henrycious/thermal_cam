@@ -11,6 +11,7 @@ import os
 import re
 import numpy as np
 from termcolor import colored
+from os import path
 
 
 class ThermalPublisher(Node):
@@ -21,7 +22,9 @@ class ThermalPublisher(Node):
         timer_period = 1/60; #camera runs with 60 FPS
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-        self.connect_camera_by_name('USB Camera: USB Camera')
+        self.cam_num = self.get_camera('USB Camera: USB Camera')
+        print(self.cam_num)
+        self.cap = cv2.VideoCapture(8)
         self.cvBridge = CvBridge()
 
     def timer_callback(self):
@@ -34,25 +37,22 @@ class ThermalPublisher(Node):
             self.publisher_.publish(self.cvBridge.cv2_to_imgmsg(top_frame))
             self.publisher2_.publish(self.cvBridge.cv2_to_imgmsg(heatmap, encoding='bgr8'))
 
-    def connect_camera_by_name(self, camera_name):
+
+    def get_camera(self, camera_name):
         cam_num = None
         for file in os.listdir("/sys/class/video4linux"):
-            real_file = os.path.realpath("/sys/class/video4linux/" + file + "/name")
+            if not path.exists("/sys/class/video4linux/" + file + "/device/input/"):
+                continue
+            input_name = os.listdir("/sys/class/video4linux/" + file + "/device/input/")
+            real_file = os.path.join("/sys/class/video4linux/" + file + "/device/input/"+ input_name[0] + "/name")
             with open(real_file, "rt") as name_file:
                 name = name_file.read().rstrip()
             if camera_name in name:
-                cam_num = int(re.search("\d+$", file).group(0))
-                self.cap = cv2.VideoCapture(cam_num)
-                success, img = self.cap.read()
-                if success:
-                    height, width = img.shape[:2]
-                    if success and height == 384 and width == 256:
-                        self.get_logger().info('Camera connected: ' + camera_name)                        
-                        return cam_num
-                        break
+                port_return = file[-1]
+                return port_return
+                break
             else:
-                continue 
-        return cam_num
+                found = ""
 
 def main(args=None):
     
